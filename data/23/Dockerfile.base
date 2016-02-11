@@ -1,0 +1,12 @@
+FROM fedora:23
+MAINTAINER ogutierrez@redhat.com
+
+ARG DISTRIBUTION=23
+
+# Update fedora and install needed packages to test admin interface
+RUN dnf update -y
+
+# Add SSH public key
+RUN mkdir /root/.ssh && chmod 700 /root/.ssh
+ADD data/${DISTRIBUTION}/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 400 /root/.ssh/authorized_keys && chown root. /root/.ssh/authorized_keys

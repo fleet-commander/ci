@@ -1,0 +1,13 @@
+FROM fc-base:23
+MAINTAINER ogutierrez@redhat.com
+
+ARG DISTRIBUTION=23
+
+# Update fedora and install needed packages to test admin interface
+RUN dnf install -y libvirt qemu
+
+# Expose SSH port
+EXPOSE 22
+
+# Execute SSH server
+ENTRYPOINT ["/usr/sbin/sshd", "-D"]

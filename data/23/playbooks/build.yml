@@ -1,0 +1,18 @@
+- name: build container f23
+  docker:
+    name: fc-build-f23
+    image: fc-build:f23
+    command:
+    state: reloaded
+    volumes:
+    - /data
+
+- name: fleet commander admin container
+  docker:
+    name: fc-admin
+    image: fc-admin:
+    state: reloaded
+    ports:
+    - "8008:8088"
+    volumes from:
+    - fc-build-latest
