@@ -16,5 +16,32 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-ansible-playbook -i hosts data/$1/playbooks/remove-containers.yml
-ansible-playbook -i hosts data/$1/playbooks/run-containers.yml
+if [ $UID != 0 ]; then
+    echo "You must have root privileges to execute this script"
+    exit 1
+fi
+
+function usage {
+    echo "Usage: $COMMAND FEDORA_RELEASE [--help]"
+}
+
+function help {
+    usage
+    echo -e "\t--help: Shows this help"
+}
+
+if [[ $* == *--help* ]]; then
+    help
+    exit 1
+fi
+
+if [ -z $1 ]; then
+    usage
+    exit 1
+fi
+
+export ANSIBLE_HOST_KEY_CHECKING=False
+
+ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/remove-containers.yml
+ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/run-containers.yml
+ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/build-packages.yml

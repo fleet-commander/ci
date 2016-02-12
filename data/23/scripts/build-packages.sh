@@ -16,16 +16,14 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-cd ~
+cd $HOME
 git clone https://github.com/fleet-commander/fc-admin.git
-cd ~/fc-admin/
+cd $HOME/fc-admin/
 git submodule init && git submodule update
 ./autogen.sh
 make check && make distcheck
-cp tests/test-suite.log /data/
+cp tests/test-suite.log $HOME
 make && make dist
-mkdir -p ~/rpmbuild/SOURCES/
-cp ~/fc-admin/fleet-commander*.tar.xz ~/rpmbuild/SOURCES/
+mkdir -p $HOME/rpmbuild/SOURCES/
+cp $HOME/fc-admin/fleet-commander*.tar.xz $HOME/rpmbuild/SOURCES/
 rpmbuild -ba fleet-commander-admin.spec
-mkdir -p /data/packages
-cp ~/rpmbuild/RPMS/* /data/packages
