@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (C) 2016 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
@@ -15,22 +16,5 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-FROM fc-base:23
-MAINTAINER ogutierrez@redhat.com
-
-ARG DISTRIBUTION=23
-
-# Install needed build packages
-RUN dnf install -y tar xz git autoconf automake autoconf-archive python2-devel dbus-python pygobject2 libvirt-python python-websockify numpy python-crypto gjs rpm-build dconf desktop-file-utils python-dbusmock
-
-# Add build script
-ADD data/${DISTRIBUTION}/scripts/build-packages.sh /root/build-packages.sh
-
-# Generate SSH server keys
-RUN sshd-keygen
-
-# Expose SSH port
-EXPOSE 22
-
-# Execute SSH server
-ENTRYPOINT ["/usr/sbin/sshd", "-D"]
+ansible-playbook -i hosts data/$1/playbooks/remove-containers.yml
+ansible-playbook -i hosts data/$1/playbooks/run-containers.yml

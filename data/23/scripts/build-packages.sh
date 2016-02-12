@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (C) 2016 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
@@ -15,22 +16,16 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-FROM fc-base:23
-MAINTAINER ogutierrez@redhat.com
-
-ARG DISTRIBUTION=23
-
-# Install needed build packages
-RUN dnf install -y tar xz git autoconf automake autoconf-archive python2-devel dbus-python pygobject2 libvirt-python python-websockify numpy python-crypto gjs rpm-build dconf desktop-file-utils python-dbusmock
-
-# Add build script
-ADD data/${DISTRIBUTION}/scripts/build-packages.sh /root/build-packages.sh
-
-# Generate SSH server keys
-RUN sshd-keygen
-
-# Expose SSH port
-EXPOSE 22
-
-# Execute SSH server
-ENTRYPOINT ["/usr/sbin/sshd", "-D"]
+cd ~
+git clone https://github.com/fleet-commander/fc-admin.git
+cd ~/fc-admin/
+git submodule init && git submodule update
+./autogen.sh
+make check && make distcheck
+cp tests/test-suite.log /data/
+make && make dist
+mkdir -p ~/rpmbuild/SOURCES/
+cp ~/fc-admin/fleet-commander*.tar.xz ~/rpmbuild/SOURCES/
+rpmbuild -ba fleet-commander-admin.spec
+mkdir -p /data/packages
+cp ~/rpmbuild/RPMS/* /data/packages
