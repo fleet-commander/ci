@@ -33,9 +33,13 @@
     docker:
       name: fc-admin-23
       image: fc-admin:23
+      privileged: yes
       state: started
       ports:
       - "127.0.0.3:2223:22"
       - "8088:8008"
+      - "8188:8181"
+      volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       volumes_from:
       - fc-build-23

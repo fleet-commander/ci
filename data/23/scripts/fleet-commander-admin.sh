@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright (C) 2016 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
@@ -15,19 +16,17 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-FROM fc-base:23
-MAINTAINER "Oliver Gutierrez" ogutierrez@redhat.com
-ENV container docker
-ARG DISTRIBUTION=23
 
-# Install needed build packages
-RUN dnf install -y tar xz git autoconf automake autoconf-archive python2-devel dbus-python pygobject2 libvirt-python python-websockify numpy python-crypto gjs rpm-build dconf desktop-file-utils python-dbusmock
+# Install package
+dnf install -y /root/rpmbuild/RPMS/noarch/fleet-commander-admin*.rpm
 
-# Generate SSH server keys
-RUN sshd-keygen
+# Execute a dbus daemon
 
-# Expose SSH port
-EXPOSE 22
 
-# Execute SSH server
-ENTRYPOINT ["/usr/sbin/sshd", "-D"]
+# Run dbus service
+
+
+# Run apache
+systemctl start httpd
+
+# Run standalone fleet commander admin

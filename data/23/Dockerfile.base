@@ -16,15 +16,14 @@
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
 FROM fedora:23
-MAINTAINER ogutierrez@redhat.com
-
+MAINTAINER "Oliver Gutierrez" ogutierrez@redhat.com
+ENV container docker
 ARG DISTRIBUTION=23
 
 # Update fedora and install needed packages
-RUN dnf update -y
-RUN dnf install -y openssh-server ansible
+RUN dnf update -y && dnf install -y initscripts openssh-server ansible && dnf clean all
 
 # Add SSH public key
-RUN mkdir /root/.ssh && chmod 700 /root/.ssh
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 ADD id_rsa.pub /root/.ssh/authorized_keys
 RUN chmod 400 /root/.ssh/authorized_keys && chown root. /root/.ssh/authorized_keys

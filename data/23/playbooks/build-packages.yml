@@ -19,16 +19,11 @@
 
   tasks:
   - name: Build RPM packages
-    command: /bin/bash /root/build-packages.sh
+    script: ../scripts/build-packages.sh
 
 
 - hosts: fc-admin
 
   tasks:
-  - name: Install admin package
-    command: dnf install /root/rpmbuild/RPMS/noarch/fleet-commander-admin*.rpm
-  - name: Run apache
-    service: name=httpd state=started
-
-
-
+  - name: Install and run fc-admin package
+    script: ../scripts/fleet-commander-admin.sh

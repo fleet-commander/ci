@@ -17,17 +17,34 @@
 
 FROM fc-base:23
 MAINTAINER ogutierrez@redhat.com
-
+ENV container docker
 ARG DISTRIBUTION=23
 
-# Update fedora and install needed packages to test admin interface
-RUN dnf install -y libvirt
+# Volume for cgroups access
+VOLUME ["/sys/fs/cgroup"]
 
 # Generate SSH server keys
 RUN sshd-keygen
 
+# Enable systemd
+RUN dnf install -y systemd dbus && dnf clean all; \
+    (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+    rm -f /lib/systemd/system/multi-user.target.wants/*;\
+    rm -f /etc/systemd/system/*.wants/*; \
+    rm -f /lib/systemd/system/local-fs.target.wants/*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+    rm -f /lib/systemd/system/basic.target.wants/*; \
+    rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+# Add dbus service
+ADD data/23/config/dbus.service /etc/systemd/system/dbus.service
+
+# Enable SSH service
+RUN systemctl enable dbus.service sshd
+
 # Expose SSH port
-EXPOSE 22
+EXPOSE 22 8008 80 8181
 
 # Execute SSH server
-ENTRYPOINT ["/usr/sbin/sshd", "-D"]
+ENTRYPOINT ["/usr/lib/systemd/systemd"]

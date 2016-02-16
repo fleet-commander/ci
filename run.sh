@@ -16,6 +16,8 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
+COMMAND=$0
+
 if [ $UID != 0 ]; then
     echo "You must have root privileges to execute this script"
     exit 1
