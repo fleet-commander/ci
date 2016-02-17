@@ -16,6 +16,7 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
+BASEDIR=/vagrant
 COMMAND=$0
 
 if [ $UID != 0 ]; then
@@ -44,6 +45,5 @@ fi
 
 export ANSIBLE_HOST_KEY_CHECKING=False
 
-ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/remove-containers.yml
-ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/run-containers.yml
-ansible-playbook -i hosts --private-key=id_rsa data/$1/playbooks/build-packages.yml
+ansible-playbook -i $BASEDIR/hosts --private-key=$BASEDIR/id_rsa $BASEDIR/data/$1/playbooks/run-containers.yml
+ansible-playbook -i $BASEDIR/hosts --private-key=$BASEDIR/id_rsa $BASEDIR/data/$1/playbooks/build-packages.yml

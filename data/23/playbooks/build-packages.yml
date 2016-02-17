@@ -20,10 +20,3 @@
   tasks:
   - name: Build RPM packages
     script: ../scripts/build-packages.sh
-
-
-- hosts: fc-admin
-
-  tasks:
-  - name: Install and run fc-admin package
-    script: ../scripts/fleet-commander-admin.sh

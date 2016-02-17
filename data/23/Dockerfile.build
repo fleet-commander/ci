@@ -15,13 +15,21 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-FROM fc-base:23
+FROM fedora:23
 MAINTAINER "Oliver Gutierrez" ogutierrez@redhat.com
 ENV container docker
 ARG DISTRIBUTION=23
 
-# Install needed build packages
-RUN dnf install -y tar xz git autoconf automake autoconf-archive python2-devel dbus-python pygobject2 libvirt-python python-websockify numpy python-crypto gjs rpm-build dconf desktop-file-utils python-dbusmock
+# Update fedora and install needed packages
+RUN dnf install -y initscripts openssh-server ansible \
+    tar xz git autoconf automake autoconf-archive python2-devel dbus-python \
+    pygobject2 libvirt-python python-websockify numpy python-crypto \
+    gjs rpm-build dconf desktop-file-utils python-dbusmock && dnf clean all
+
+# Add SSH public key
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+ADD /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 400 /root/.ssh/authorized_keys && chown root. /root/.ssh/authorized_keys
 
 # Generate SSH server keys
 RUN sshd-keygen

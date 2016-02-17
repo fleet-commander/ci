@@ -16,11 +16,12 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
+BASEDIR=/vagrant
 COMMAND=$0
 DIST=$1
 ARGS=""
-DISTS=`ls data/`
-IMAGES="base build admin"
+DISTS=`ls $BASEDIR/data/`
+IMAGES="build"
 
 if [ $UID != 0 ]; then
     echo "You must have root privileges to execute this script"
@@ -53,6 +54,7 @@ fi
 
 if [[ $DISTS == *$DIST* ]]; then
 
+    cd $BASEDIR
     for IMG in $IMAGES
     do
         docker build -f data/$DIST/Dockerfile.$IMG -t fc-$IMG:$DIST $ARGS .
