@@ -31,6 +31,3 @@
       state: started
       ports:
       - "127.0.0.2:2222:22"
-      volumes:
-      - /vagrant/volume:/root:rw
-

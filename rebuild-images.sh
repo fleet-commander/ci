@@ -18,8 +18,7 @@
 
 BASEDIR=/vagrant
 COMMAND=$0
-DIST=$1
-ARGS=""
+DIST=23
 DISTS=`ls $BASEDIR/data/`
 IMAGES="build"
 
@@ -29,7 +28,7 @@ if [ $UID != 0 ]; then
 fi
 
 function usage {
-    echo "Usage: $COMMAND FEDORA_RELEASE [--help] [DOCKER_OPTIONS]"
+    echo "Usage: $COMMAND [--help] [DOCKER_OPTIONS]"
 }
 
 function help {
@@ -42,22 +41,12 @@ if [[ $* == *--help* ]]; then
     exit 1
 fi
 
-if [ -z $1 ]; then
-    usage
-    exit 1
-fi
-
-if [ $2 ]; then
-    shift
-    ARGS=$*
-fi
-
 if [[ $DISTS == *$DIST* ]]; then
 
     cd $BASEDIR
     for IMG in $IMAGES
     do
-        docker build -f data/$DIST/Dockerfile.$IMG -t fc-$IMG:$DIST $ARGS .
+        docker build -f data/$DIST/Dockerfile.$IMG -t fc-$IMG:$DIST $* .
         if [ $? != 0 ]; then
             echo "Error building $IMG image"
             exit 1

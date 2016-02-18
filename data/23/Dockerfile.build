@@ -28,7 +28,7 @@ RUN dnf install -y initscripts openssh-server ansible \
 
 # Add SSH public key
 RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
-ADD /vagrant/id_rsa.pub /root/.ssh/authorized_keys
+ADD id_rsa.pub /root/.ssh/authorized_keys
 RUN chmod 400 /root/.ssh/authorized_keys && chown root. /root/.ssh/authorized_keys
 
 # Generate SSH server keys

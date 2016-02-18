@@ -17,12 +17,14 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.provision "shell", inline: <<-SHELL
-      sudo dnf install -y docker ansible python-docker-py
+      sudo dnf install -y docker ansible python-docker-py httpd
       #sudo dnf update -y
       sudo systemctl enable docker
       sudo systemctl start docker
-      sudo /vagrant/rebuild-images.sh 23
-      sudo /vagrant/run.sh 23
+      sudo systemctl enable httpd
+      sudo systemctl start httpd
+      sudo /vagrant/rebuild-images.sh
+      sudo /vagrant/run.sh
     SHELL
   end
 
