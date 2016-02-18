@@ -19,4 +19,4 @@
 
   tasks:
   - name: Build RPM packages
-    script: ../scripts/build-packages.sh
+    script: ../scripts/build-packages.sh {{ branch }}

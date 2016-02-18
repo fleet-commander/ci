@@ -26,7 +26,7 @@ if [ $UID != 0 ]; then
 fi
 
 function usage {
-    echo "Usage: $COMMAND [--help]"
+    echo "Usage: $COMMAND [BRANCH_NAME] [--help]"
 }
 
 function help {
@@ -39,12 +39,18 @@ if [[ $* == *--help* ]]; then
     exit 1
 fi
 
+if [ -z $1 ]; then
+    BRANCH="master"
+else
+    BRANCH=$1
+fi
+
 export ANSIBLE_HOST_KEY_CHECKING=False
 
 # Build packages
 rm -rf $BASEDIR/packages > /dev/null 2>&1
 ansible-playbook -i $BASEDIR/hosts --private-key=$BASEDIR/id_rsa $BASEDIR/data/$DIST/playbooks/run-containers.yml
-ansible-playbook -i $BASEDIR/hosts --private-key=$BASEDIR/id_rsa $BASEDIR/data/$DIST/playbooks/build-packages.yml
+ansible-playbook -i $BASEDIR/hosts --private-key=$BASEDIR/id_rsa $BASEDIR/data/$DIST/playbooks/build-packages.yml --extra-vars "branch=$BRANCH"
 docker cp fc-build-$DIST:/root/rpmbuild/RPMS/noarch $BASEDIR/packages
 
 # Reinstall admin package

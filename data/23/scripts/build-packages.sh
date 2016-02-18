@@ -17,8 +17,9 @@
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
 cd $HOME
-git clone https://github.com/fleet-commander/fc-admin.git
+git clone https://github.com/fleet-commander/fc-admin.git --branch $1 --single-branch
 cd $HOME/fc-admin/
+git checkout $1
 git submodule init && git submodule update
 ./autogen.sh
 make check && make distcheck
