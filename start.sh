@@ -16,14 +16,8 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-cd $HOME
-git clone https://github.com/fleet-commander/fc-admin.git --branch $1 --single-branch
-cd $HOME/fc-admin/
-git submodule init && git submodule update
-./autogen.sh
-make check && make distcheck
-cp tests/test-suite.log $HOME
-make && make dist
-mkdir -p $HOME/rpmbuild/SOURCES/
-cp $HOME/fc-admin/fleet-commander*.tar.xz $HOME/rpmbuild/SOURCES/
-rpmbuild -ba fleet-commander-admin.spec
+if [ ! -f ./id_rsa || ! -f id_rsa.pub ]; then
+	rm -f ./id_rsa ./id_rsa.pub > /dev/null 2>&1
+	ssh-keygen -f ./id_rsa -q -N ""
+fi
+vagrant up
