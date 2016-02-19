@@ -1,6 +1,0 @@
-[local]
-localhost       ansible_connection=local
-
-[containers]
-fc-build        ansible_connection=ssh ansible_ssh_host=127.0.0.2 ansible_ssh_port=2222
-fc-admin        ansible_connection=ssh ansible_ssh_host=127.0.0.3 ansible_ssh_port=2223

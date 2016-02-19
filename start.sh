@@ -16,8 +16,37 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-if [ ! -f ./id_rsa || ! -f id_rsa.pub ]; then
-	rm -f ./id_rsa ./id_rsa.pub > /dev/null 2>&1
-	ssh-keygen -f ./id_rsa -q -N ""
+
+BUILD_PRIVATE_KEY=.vagrant/machines/build/libvirt/private_key
+ADMIN_PRIVATE_KEY=.vagrant/machines/admin/libvirt/private_key
+INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+
+if [ -z $1 ]; then
+    BRANCH="master"
+else
+    BRANCH=$1
 fi
+
+echo "##########################################################################"
+echo "# Bringing up machines"
+echo "##########################################################################"
 vagrant up
+
+echo "##########################################################################"
+echo "# Building fleet commander: $BRANCH"
+echo "##########################################################################"
+ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE ansible/playbooks/build.yml --extra-args $BRANCH
+
+echo "##########################################################################"
+echo "# Syncing vagrant directory"
+echo "##########################################################################"
+vagrant rsync
+
+echo "##########################################################################"
+echo "# Installing fleet commander in admin machine"
+echo "##########################################################################"
+ansible-playbook --private-key=$ADMIN_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE ansible/playbooks/install.yml
+
+echo "##########################################################################"
+echo "# Finshed. Connect to http://$(vagrant ssh admin -c "ip address show eth0 | grep 'inet ' | sed -e 's/^.*inet //' -e 's/\/.*$//' | cat -v | sed -e 's/\^M//g' | sed -e 's/ //g'"):8008"
+echo "##########################################################################"

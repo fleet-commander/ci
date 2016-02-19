@@ -15,8 +15,17 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-- hosts: fc-build
 
+# Create link for fleet-commander-admin in httpd
+# if [ ! -L /etc/httpd/conf.d/fleet-commander-apache.conf ]; then
+#     ln -s /etc/xdg/fleet-commander-apache.conf /etc/httpd/conf.d/
+# fi
+
+- hosts: admin
   tasks:
-  - name: Build RPM packages
-    script: ../scripts/build-packages.sh {{ branch }}
+    - name: Remove any previous fleet commander installation
+      dnf: name=fleet-commander-admin state=absent
+    - name: Install fleet commander admin package
+      raw: sudo dnf install -y /home/vagrant/rpmbuild/RPMS/noarch/fleet-commander-admin*.rpm
+    - name: Restart apache web server
+      service: name=httpd state=restarted
