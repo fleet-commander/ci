@@ -22,10 +22,11 @@
 # fi
 
 - hosts: admin
+  become: true
   tasks:
     - name: Remove any previous fleet commander installation
       dnf: name=fleet-commander-admin state=absent
     - name: Install fleet commander admin package
-      raw: sudo dnf install -y /home/vagrant/rpmbuild/RPMS/noarch/fleet-commander-admin*.rpm
+      command: dnf install -y /home/vagrant/rpms/fleet-commander-admin*.rpm
     - name: Restart apache web server
       service: name=httpd state=restarted

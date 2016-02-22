@@ -49,21 +49,10 @@ Vagrant.configure(2) do |config|
   config.vm.define "admin" do |admin|
     admin.vm.box = "fedora/23-cloud-base"
 
-    #admin.vm.network "public_network" bridge => 'em1', :dev => 'em1'
-    #admin.vm.network "private_network", ip: "192.168.121.111"
-    #admin.vm.network "forwarded_port", guest: 8008, host: 8088
-    #admin.vm.network "forwarded_port", guest: 8989, host: 8989
-
     admin.vm.provider "libvirt" do |domain|
       # Libvirt configuration
       #domain.uri = "qemu:///session"
       #domain.storage_pool_name = "gnome-boxes"
-
-      # Domain configuration
-      #domain.memory = 512
-      #domain.cpus = 2
-      #domain.nested = true
-      #domain.volume_cache = 'none'
     end
 
     admin.vm.provision "ansible" do |ansible|
@@ -71,8 +60,5 @@ Vagrant.configure(2) do |config|
       ansible.playbook = "ansible/playbooks/provision.yml"
     end
   end
-
-
-
 
 end

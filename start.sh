@@ -27,6 +27,12 @@ else
     BRANCH=$1
 fi
 
+# Setup variables for ansible
+export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
+export ANSIBLE_HOST_KEY_CHECKING=false
+export ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s'
+
 echo "##########################################################################"
 echo "# Bringing up machines"
 echo "##########################################################################"
@@ -35,7 +41,7 @@ vagrant up
 echo "##########################################################################"
 echo "# Building fleet commander: $BRANCH"
 echo "##########################################################################"
-ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE ansible/playbooks/build.yml --extra-args $BRANCH
+ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -v ansible/playbooks/build.yml --extra-vars repo_version=$BRANCH
 
 echo "##########################################################################"
 echo "# Syncing vagrant directory"
@@ -45,7 +51,7 @@ vagrant rsync
 echo "##########################################################################"
 echo "# Installing fleet commander in admin machine"
 echo "##########################################################################"
-ansible-playbook --private-key=$ADMIN_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE ansible/playbooks/install.yml
+ansible-playbook --private-key=$ADMIN_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -v ansible/playbooks/install.yml
 
 echo "##########################################################################"
 echo "# Finshed. Connect to http://$(vagrant ssh admin -c "ip address show eth0 | grep 'inet ' | sed -e 's/^.*inet //' -e 's/\/.*$//' | cat -v | sed -e 's/\^M//g' | sed -e 's/ //g'"):8008"

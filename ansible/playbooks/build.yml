@@ -29,20 +29,57 @@
 # rpmbuild -ba fleet-commander-admin.spec
 
 - hosts: build
-  - name: Clone fleet commander admin ({{ repo_version }})
-    git: repo=https://github.com/fleet-commander/fc-admin.git
-       dest=/vagrant/src/fc-admin
-       version={{ repo_version }}
-  - name: Initialize repository submodules
-    raw: cd /vagrant/srv/fc-admin/ && git submodule init && git submodule update
-  - name: Autogen tool
-    raw: cd /vagrant/srv/fc-admin/ && ./autogen.sh
-  - name: Running tests
-    raw: cd /vagrant/srv/fc-admin/ && make check && make distcheck
-  - name: Make dist
-    raw: cd /vagrant/srv/fc-admin/ && make && make dist
-  - name: Prepare RPM build
-    raw: mkdir -p $HOME/rpmbuild/SOURCES/ && cp /vagrant/src/fc-admin/fleet-commander*.tar.xz $HOME/rpmbuild/SOURCES/
-  - name: Build RPM package
-    raw: rpmbuild -ba fleet-commander-admin.spec
-
+  tasks:
+    - name: Remove previously built packages
+      file: path=/home/vagrant/rpmbuild/RPMS/noarch/ state=absent
+    - name: Remove previously checked out sources
+      file: path=/home/vagrant/fc-admin state=absent
+    - name: Clone fleet commander admin sources
+      git: repo=https://github.com/fleet-commander/fc-admin.git
+         dest=/home/vagrant/fc-admin
+         version={{ repo_version }}
+    - name: Echo path
+      shell: echo $PATH
+    - name: Initialize repository submodules
+      command: git submodule init
+      args:
+        chdir: /home/vagrant/fc-admin
+    - name: Update repository submodules
+      command: git submodule update
+      args:
+        chdir: /home/vagrant/fc-admin
+    - name: Autogen tool
+      shell: ./autogen.sh
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+      args:
+        chdir: /home/vagrant/fc-admin
+    # - name: Run tests
+    #   command: make check
+    #   args:
+    #     chdir: /home/vagrant/fc-admin
+    # - name: Run dist tests
+    #   command: make distcheck
+    #   args:
+    #     chdir: /home/vagrant/fc-admin
+    - name: Make
+      command: make
+      args:
+        chdir: /home/vagrant/fc-admin
+    - name: Make dist
+      command: make dist
+      args:
+        chdir: /home/vagrant/fc-admin
+    - name: Ensure sources directory exists
+      file: path=/home/vagrant/rpmbuild/SOURCES state=directory
+    - name: Copy tarball distribution to RPM build sources
+      copy: src={{ item }} dest=/home/vagrant/rpmbuild/SOURCES/
+      with_fileglob:
+        - /home/vagrant/fc-admin/fleet-commander-admin-*.tar.xz
+    - name: Build RPM package
+      command: rpmbuild -ba /home/vagrant/fc-admin/fleet-commander-admin.spec
+    - name: Copy RPM files to admin machine
+      synchronize:
+          src: /home/vagrant/rpmbuild/RPMS/noarch
+          dest: /home/vagrant/rpms
+      delegate_to: admin
