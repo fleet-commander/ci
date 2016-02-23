@@ -18,7 +18,6 @@
 
 
 BUILD_PRIVATE_KEY=.vagrant/machines/build/libvirt/private_key
-ADMIN_PRIVATE_KEY=.vagrant/machines/admin/libvirt/private_key
 INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
 
 if [ -z $1 ]; then
@@ -27,14 +26,12 @@ else
     BRANCH=$1
 fi
 
-# Setup variables for ansible
-export PYTHONUNBUFFERED=1
-export ANSIBLE_FORCE_COLOR=true
-export ANSIBLE_HOST_KEY_CHECKING=false
-export ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s'
-
 echo "##########################################################################"
 echo "# Building fleet commander: $BRANCH"
 echo "##########################################################################"
-ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -v ansible/playbooks/build.yml --extra-vars repo_version=$BRANCH
+PYTHONUNBUFFERED=1 \
+ANSIBLE_FORCE_COLOR=true \
+ANSIBLE_HOST_KEY_CHECKING=false \
+ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s' \
+ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -vv ansible/playbooks/build.yml --extra-vars repo_version=$BRANCH
 

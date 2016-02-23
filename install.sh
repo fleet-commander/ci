@@ -16,25 +16,16 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
+ADMIN_PRIVATE_KEY=.vagrant/machines/admin/libvirt/private_key
 INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
 
-if [ -z $1 ]; then
-    BRANCH="master"
-else
-    BRANCH=$1
-fi
-
 echo "##########################################################################"
-echo "# Bringing up machines"
+echo "# Installing fleet commander in admin machine"
 echo "##########################################################################"
-vagrant up
 
-# Building fleet commander
-./build.sh $BRANCH
+PYTHONUNBUFFERED=1 \
+ANSIBLE_FORCE_COLOR=true \
+ANSIBLE_HOST_KEY_CHECKING=false \
+ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s' \
+ansible-playbook --private-key=$ADMIN_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -vv ansible/playbooks/install.yml
 
-# Installing fleet commander in admin machine
-./install.sh
-
-echo "##########################################################################"
-echo "# Finshed. Connect to http://$(cat $INVENTORY_FILE | grep admin | cut -d ' ' -f2 | cut -d'=' -f2):8008"
-echo "##########################################################################"

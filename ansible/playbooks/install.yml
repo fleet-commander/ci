@@ -24,9 +24,17 @@
 - hosts: admin
   become: true
   tasks:
+    - name: Remove previous RPM packages
+      file: path=/home/vagrant/packages/ state=absent
+    - name: Copy RPM packages
+      synchronize: src=../../packages/ dest=/home/vagrant/packages/
     - name: Remove any previous fleet commander installation
       dnf: name=fleet-commander-admin state=absent
     - name: Install fleet commander admin package
-      command: dnf install -y /home/vagrant/rpms/fleet-commander-admin*.rpm
+      shell: dnf install -y fleet-commander-admin*.rpm
+      args:
+        chdir: /home/vagrant/packages/
+    - name: Create link for admin application in apache config
+      file: src=/etc/xdg/fleet-commander-apache.conf dest=/etc/httpd/conf.d/fleet-commander-apache.conf state=link
     - name: Restart apache web server
       service: name=httpd state=restarted
