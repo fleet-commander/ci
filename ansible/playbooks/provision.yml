@@ -51,8 +51,6 @@
         - dconf
         - desktop-file-utils
         - python-dbusmock
-    - name: Create sources directories
-      file: path=/home/vagrant/rpmbuild/SOURCES state=directory
 
 - hosts: admin
   gather_facts: false
@@ -68,3 +66,14 @@
       service: name=httpd enabled=yes
     - name: Start apache web server
       service: name=httpd state=started
+
+- hosts: hyper
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install ansible needed packages
+      raw: sudo dnf install -y python2 python2-dnf libselinux-python \
+    - name: Install hypervisor dependences
+      dnf: name={{item}} state=present
+      with_items:
+        - libvirt
