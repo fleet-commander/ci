@@ -15,19 +15,6 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-# Original script
-# cd $HOME
-# git clone https://github.com/fleet-commander/fc-admin.git --branch $1 --single-branch
-# cd $HOME/fc-admin/
-# git submodule init && git submodule update
-# ./autogen.sh
-# make check && make distcheck
-# cp tests/test-suite.log $HOME
-# make && make dist
-# mkdir -p $HOME/rpmbuild/SOURCES/
-# cp $HOME/fc-admin/fleet-commander*.tar.xz $HOME/rpmbuild/SOURCES/
-# rpmbuild -ba fleet-commander-admin.spec
-
 - hosts: build
   tasks:
     - name: Remove previously built packages
@@ -37,6 +24,7 @@
     - name: Clone fleet commander admin sources
       git: repo=https://github.com/fleet-commander/fc-admin.git
          dest=/home/vagrant/fc-admin
+         depth=1
          version={{ repo_version }}
     - name: Initialize repository submodules
       command: git submodule init
@@ -70,10 +58,8 @@
         chdir: /home/vagrant/fc-admin
     - name: Ensure sources directory exists
       file: path=/home/vagrant/rpmbuild/SOURCES state=directory
-
     - name: Copy tarball distribution file to RPM build sources
       shell: cp /home/vagrant/fc-admin/fleet-commander-admin-*.tar.xz /home/vagrant/rpmbuild/SOURCES/
-
     - name: Build RPM package
       shell: rpmbuild -ba /home/vagrant/fc-admin/fleet-commander-admin.spec
       environment:
