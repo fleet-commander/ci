@@ -15,12 +15,6 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-
-# Create link for fleet-commander-admin in httpd
-# if [ ! -L /etc/httpd/conf.d/fleet-commander-apache.conf ]; then
-#     ln -s /etc/xdg/fleet-commander-apache.conf /etc/httpd/conf.d/
-# fi
-
 - hosts: admin
   become: true
   tasks:
