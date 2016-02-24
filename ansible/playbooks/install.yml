@@ -30,5 +30,29 @@
         chdir: /home/vagrant/packages/
     - name: Create link for admin application in apache config
       file: src=/etc/xdg/fleet-commander-apache.conf dest=/etc/httpd/conf.d/fleet-commander-apache.conf state=link
+    - name: Obtain hypervisor machine IP address
+      register: hyper_ip
+      shell: echo -n `ip -4 addr show eth0 | grep inet | cut -d ' ' -f 6 | cut -d / -f 1`
+      delegate_to: hyper
+    - name: Prepare hypervisor config for fleet-commander-admin
+      shell: python /vagrant/ansible/scripts/update_hypervisor_ip.py {{ hyper_ip.stdout_lines }}
+      environment:
+        PYTHONPATH: /usr/share/fleet-commander-admin/python
+    - name: Push hypervisor private key to fleet-commander-admin config
+      copy: src=../../.vagrant/machines/hyper/libvirt/private_key dest=/var/lib/fleet-commander-admin/id_rsa mode=0600
+    - name: Read hypervisor public key
+      slurp: src=/home/vagrant/.ssh/authorized_keys
+      register: hyper_pubkey
+      delegate_to: hyper
+    - name: Write hypervisor public key into fleet-commander-admin config
+      copy:
+        dest: /var/lib/fleet-commander-admin/id_rsa.pub
+        content: "{{ hyper_pubkey.content | b64decode }}"
+    - name: Push database with hypervisor configuration already set
+      debug: msg="Push database with hypervisor configuration already set"
     - name: Restart apache web server
       service: name=httpd state=restarted
+    - name: Show IP address
+      register: admin_ip
+      shell: echo -n "Connect to http://" ; echo -n `ip -4 addr show eth0 | grep inet | cut -d ' ' -f 6 | cut -d / -f 1` ; echo -n ":8008"
+    - debug: msg={{ admin_ip.stdout_lines }}
