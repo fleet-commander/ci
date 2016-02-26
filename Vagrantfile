@@ -45,6 +45,8 @@ Vagrant.configure(2) do |config|
 
     hyper.vm.provider "libvirt" do |domain|
       domain.nested = true
+      domain.cpu_mode = "host-model"
+      domain.memory = 1024
     end
 
     hyper.vm.provision "ansible" do |ansible|

@@ -77,3 +77,35 @@
       dnf: name={{item}} state=present
       with_items:
         - libvirt
+        - vagrant
+        - vagrant-libvirt
+        - ansible
+    - name: Enable libvirtd service
+      service: name=libvirtd enabled=yes
+    - name: Start libvirtd service
+      service: name=libvirtd state=started
+    - name: Create logger virtual machine directory
+      file: path=/home/vagrant/logger/ state=directory owner=vagrant
+    - name: Copy Vagrantfile for logger virtual machine directory
+      copy: src=../config/Vagrantfile.logger dest=/home/vagrant/logger/Vagrantfile owner=vagrant
+    - name: Download Fedora box file from Vagrant Atlas
+      get_url: url=https://download.fedoraproject.org/pub/fedora/linux/releases/23/Cloud/x86_64/Images/Fedora-Cloud-Base-Vagrant-23-20151030.x86_64.vagrant-libvirt.box dest=/tmp/fedora.box
+    - name: Add box to vagrant boxes
+      command: vagrant box add /tmp/fedora.box --name fedora/23-cloud-base --force
+    - name: Remove box file
+      file: path=/tmp/fedora.box state=absent
+    - name: Copy vagrant user public key to root user
+      command: cp /home/vagrant/.ssh/authorized_keys /root/.ssh/
+
+- hosts: logger
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install ansible needed packages
+      raw: sudo dnf install -y python2 python2-dnf libselinux-python \
+    - name: Copy RPM packages
+      synchronize: src=../../packages/ dest=/home/vagrant/packages/
+    - name: Install fleet commander logger package
+      shell: dnf install -y fleet-commander-logger*.rpm
+      args:
+        chdir: /home/vagrant/packages/

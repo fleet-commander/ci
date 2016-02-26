@@ -1,4 +1,6 @@
-#!/bin/bash
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
 # Copyright (C) 2016 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or
@@ -16,16 +18,22 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-ADMIN_PRIVATE_KEY=.vagrant/machines/admin/libvirt/private_key
-INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+Vagrant.configure(2) do |config|
 
-echo "##########################################################################"
-echo "# Installing fleet commander in admin machine"
-echo "##########################################################################"
+  config.vm.define "logger" do |build|
+    build.vm.box = "fedora/23-cloud-base"
 
-PYTHONUNBUFFERED=1 \
-ANSIBLE_FORCE_COLOR=true \
-ANSIBLE_HOST_KEY_CHECKING=false \
-ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s' \
-ansible-playbook --private-key=$ADMIN_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -vv ansible/playbooks/install.yml $*
+    config.vm.provider :libvirt do |libvirt|
+       libvirt.management_network_name = 'vagrant-libvirt-new'
+       libvirt.management_network_address = '192.168.124.0/24'
+    end
 
+    build.vm.provision "ansible" do |ansible|
+      ansible.limit = "logger"
+      ansible.verbose = "vv"
+      ansible.playbook = "/vagrant/ansible/playbooks/provision.yml"
+    end
+
+  end
+
+end
