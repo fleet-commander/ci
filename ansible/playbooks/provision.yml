@@ -109,3 +109,7 @@
       shell: dnf install -y fleet-commander-logger*.rpm
       args:
         chdir: /home/vagrant/packages/
+    - debug: msg="TODO - Create an user for login in to machine"
+    - debug: msg="TODO - Enable console autologin in machine"
+    - debug: msg="TODO - Copy dconf helper script"
+    - debug: msg="TODO - Add dconf helper script to .bashrc"

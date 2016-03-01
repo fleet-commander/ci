@@ -23,6 +23,10 @@ Vagrant.configure(2) do |config|
   config.vm.define "build" do |build|
     build.vm.box = "fedora/23-cloud-base"
 
+    build.vm.provider "libvirt" do |domain|
+      domain.graphics_type = 'spice'
+    end
+
     build.vm.provision "ansible" do |ansible|
       ansible.limit = "build"
       ansible.verbose = "vv"
@@ -32,6 +36,10 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "admin" do |admin|
     admin.vm.box = "fedora/23-cloud-base"
+
+    admin.vm.provider "libvirt" do |domain|
+      domain.graphics_type = 'spice'
+    end
 
     admin.vm.provision "ansible" do |ansible|
       ansible.limit = "admin"
@@ -44,6 +52,7 @@ Vagrant.configure(2) do |config|
     hyper.vm.box = "fedora/23-cloud-base"
 
     hyper.vm.provider "libvirt" do |domain|
+      domain.graphics_type = 'spice'
       domain.nested = true
       domain.cpu_mode = "host-model"
       domain.memory = 1024

@@ -24,17 +24,29 @@ else
     BRANCH=$1
 fi
 
+systool -m kvm_intel -A nested | grep nested | grep Y > /dev/null 2>&1
+
+if [ $? != 0 ]; then
+    echo "##########################################################################"
+    echo "# WARNING: KVM module not loaded with nested=1 or error running systool"
+    echo "# Please check you have installed systool command in your system and"
+    echo "# check that you have loaded your KVM module with nested virtualization"
+    echo "# enabled."
+    echo "# You can check it by running:"
+    echo "#     systool -m kvm_intel -A nested"
+    echo "##########################################################################"
+    echo "Do you want to continue? (y/n)"
+
+    read -i "Do you want to continue? (y/n)" answer
+    if [ $answer != 'y' ] && [ $answer != 'Y' ]; then
+        exit 1
+    fi
+fi
+
 echo "##########################################################################"
 echo "# Bringing up machines"
 echo "##########################################################################"
 vagrant up
+exit $?
 
-# Building fleet commander
-./build.sh $BRANCH
 
-# Installing fleet commander in admin machine
-./install.sh
-
-echo "##########################################################################"
-echo "# Finshed. Connect to http://$(cat $INVENTORY_FILE | grep admin | cut -d ' ' -f2 | cut -d'=' -f2):8008"
-echo "##########################################################################"

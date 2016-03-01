@@ -26,6 +26,7 @@ Vagrant.configure(2) do |config|
     config.vm.provider :libvirt do |libvirt|
        libvirt.management_network_name = 'vagrant-libvirt-new'
        libvirt.management_network_address = '192.168.124.0/24'
+       libvirt.graphics_type = 'spice'
     end
 
     build.vm.provision "ansible" do |ansible|
