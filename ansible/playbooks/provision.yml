@@ -26,10 +26,6 @@
   tasks:
     - name: Install ansible needed packages
       raw: dnf install -y python2 python2-dnf libselinux-python
-        # tar xz git autoconf automake autoconf-archive python2-devel \
-        # dbus-python pygobject2 libvirt-python python-websockify numpy \
-        # python-crypto gjs rpm-build dconf desktop-file-utils python-dbusmock
-
     - name: Install build dependences
       dnf: name={{item}} state=present
       with_items:
@@ -51,6 +47,7 @@
         - dconf
         - desktop-file-utils
         - python-dbusmock
+        - dbus-x11
 
 - hosts: admin
   gather_facts: false
@@ -102,14 +99,20 @@
   become: true
   tasks:
     - name: Install ansible needed packages
-      raw: sudo dnf install -y python2 python2-dnf libselinux-python \
+      raw: sudo dnf install -y python2 python2-dnf libselinux-python
     - name: Copy RPM packages
       synchronize: src=../../packages/ dest=/home/vagrant/packages/
     - name: Install fleet commander logger package
       shell: dnf install -y fleet-commander-logger*.rpm
       args:
         chdir: /home/vagrant/packages/
-    - debug: msg="TODO - Create an user for login in to machine"
-    - debug: msg="TODO - Enable console autologin in machine"
-    - debug: msg="TODO - Copy dconf helper script"
-    - debug: msg="TODO - Add dconf helper script to .bashrc"
+    - name: Disable graphical console on boot
+      lineinfile: dest=/etc/default/grub regexp='^GRUB_CMDLINE_LINUX*' line='GRUB_CMDLINE_LINUX="no_timer_check console=tty1 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 console=ttyS1 nomodeset"'
+    - name: Update GRUB configuration
+      command: grub2-mkconfig -o /boot/grub2/grub.cfg
+    - name: Enable autologin in logger machine
+      lineinfile: dest=/usr/lib/systemd/system/getty@.service regexp='^ExecStart\=.*' line='ExecStart=-/sbin/agetty --autologin vagrant --noclear %I $TERM'
+    - name: Copy logger helper script
+      copy: src=../scripts/logger_helper.sh dest=/home/vagrant/logger_helper.sh owner=vagrant mode=0755
+    - name: Add logger helper script to profiles for autostart on login
+      lineinfile: dest=/etc/profile line='/home/vagrant/logger_helper.sh'
