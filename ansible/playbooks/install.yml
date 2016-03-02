@@ -70,4 +70,4 @@
     - name: Show IP address
       register: admin_ip
       shell: echo -n "Connect to http://" ; echo -n `ip -4 addr show eth0 | grep inet | cut -d ' ' -f 6 | cut -d / -f 1` ; echo -n ":8008"
-    - debug: msg={{ admin_ip.stdout_lines }}
+    - debug: msg="{{ admin_ip.stdout_lines }} - Hypervisor IP address is {{ hyper_ip.stdout_lines }}"

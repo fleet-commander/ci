@@ -17,10 +17,15 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-echo "Executing Fleet commander logger"
-/usr/libexec/fleet_commander_logger.js &
+echo "Executing Fleet commander logger ..."
+/usr/libexec/fleet_commander_logger.js -v &
 
-echo "Writing sample dconf keys"
+sleep 5
+
+eval `dbus-launch`
+export DBUS_SESSION_BUS_ADDRESS
+
+echo "Writing sample dconf keys ..."
 dconf write /org/gnome/nautilus/preferences/show-directory-item-counts "'never'"
 dconf write /org/gnome/nautilus/preferences/default-sort-order "'size'"
 dconf write /org/gnome/nautilus/preferences/show-hidden-files true
@@ -31,5 +36,3 @@ echo " - /org/gnome/nautilus/preferences/show-directory-item-counts set to never
 echo " - /org/gnome/nautilus/preferences/default-sort-order set to size"
 echo " - /org/gnome/nautilus/preferences/show-hidden-files set to true"
 echo " - /org/gnome/nautilus/preferences/thumbnail-limit set to 5242880"
-
-

@@ -100,6 +100,11 @@
   tasks:
     - name: Install ansible needed packages
       raw: sudo dnf install -y python2 python2-dnf libselinux-python
+    - name: Install logger dependences
+      dnf: name={{item}} state=present
+      with_items:
+        - dbus-x11
+        - dconf
     - name: Copy RPM packages
       synchronize: src=../../packages/ dest=/home/vagrant/packages/
     - name: Install fleet commander logger package

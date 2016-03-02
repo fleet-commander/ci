@@ -40,14 +40,16 @@
         PATH: /bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       args:
         chdir: /home/vagrant/fc-admin
-    # - name: Run tests
-    #   command: make check
-    #   args:
-    #     chdir: /home/vagrant/fc-admin
-    # - name: Run dist tests
-    #   command: make distcheck
-    #   args:
-    #     chdir: /home/vagrant/fc-admin
+    - name: Run tests
+      command: make check
+      args:
+        chdir: /home/vagrant/fc-admin
+    - name: Run dist tests
+      command: make distcheck
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+      args:
+        chdir: /home/vagrant/fc-admin
     - name: Make
       command: make
       args:
