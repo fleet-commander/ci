@@ -17,22 +17,35 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-echo "Executing Fleet commander logger ..."
-/usr/libexec/fleet_commander_logger.js -v &
-
-sleep 5
-
 eval `dbus-launch`
 export DBUS_SESSION_BUS_ADDRESS
 
-echo "Writing sample dconf keys ..."
-dconf write /org/gnome/nautilus/preferences/show-directory-item-counts "'never'"
-dconf write /org/gnome/nautilus/preferences/default-sort-order "'size'"
-dconf write /org/gnome/nautilus/preferences/show-hidden-files true
-dconf write /org/gnome/nautilus/preferences/thumbnail-limit 5242880
+echo "Executing Fleet commander logger"
+/usr/libexec/fleet_commander_logger.js -v &
 
-echo "All done! Modified keys:"
-echo " - /org/gnome/nautilus/preferences/show-directory-item-counts set to never"
-echo " - /org/gnome/nautilus/preferences/default-sort-order set to size"
-echo " - /org/gnome/nautilus/preferences/show-hidden-files set to true"
-echo " - /org/gnome/nautilus/preferences/thumbnail-limit set to 5242880"
+while [ 1 ]
+do
+    echo "Writing sample dconf keys"
+    # GSettings keys
+    dconf write /org/gnome/nautilus/preferences/show-directory-item-counts "'never'"
+    dconf write /org/gnome/nautilus/preferences/default-sort-order "'size'"
+    dconf write /org/gnome/nautilus/preferences/show-hidden-files true
+    dconf write /org/gnome/nautilus/preferences/thumbnail-limit 5242880
+    # LibreOffice keys
+    # dconf write /org/libreoffice/key1 "'A'"
+    # dconf write /org/libreoffice/key2 "'B'"
+    # dconf write /org/libreoffice/key3 "'C'"
+    sleep 5
+
+    echo "Writing sample dconf keys"
+    # GSettings keys
+    dconf write /org/gnome/nautilus/preferences/show-directory-item-counts "'always'"
+    dconf write /org/gnome/nautilus/preferences/default-sort-order "'date'"
+    dconf write /org/gnome/nautilus/preferences/show-hidden-files false
+    dconf write /org/gnome/nautilus/preferences/thumbnail-limit 2561440
+    # LibreOffice keys
+    # dconf write /org/libreoffice/key1 "'X'"
+    # dconf write /org/libreoffice/key2 "'Y'"
+    # dconf write /org/libreoffice/key3 "'Z'"
+    sleep 5
+done
