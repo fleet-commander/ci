@@ -103,6 +103,7 @@
     - name: Install logger dependences
       dnf: name={{item}} state=present
       with_items:
+        - nautilus
         - dbus-x11
         - dconf
     - name: Copy RPM packages
@@ -120,4 +121,4 @@
     - name: Copy logger helper script
       copy: src=../scripts/logger_helper.sh dest=/home/vagrant/logger_helper.sh owner=vagrant mode=0755
     - name: Add logger helper script to profiles for autostart on login
-      lineinfile: dest=/etc/profile line='/home/vagrant/logger_helper.sh'
+      lineinfile: dest=/home/vagrant/.bashrc line='/home/vagrant/logger_helper.sh'
