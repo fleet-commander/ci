@@ -35,11 +35,16 @@ if [ $? != 0 ]; then
     echo "# You can check it by running:"
     echo "#     systool -m kvm_intel -A nested"
     echo "##########################################################################"
-    echo "Do you want to continue? (y/n)"
-
-    read -i "Do you want to continue? (y/n)" answer
+    echo -e "Do you want me to try to reload KVM module? (y/n)"
+    read answer
     if [ $answer != 'y' ] && [ $answer != 'Y' ]; then
         exit 1
+    else
+        sudo rmmod kvm_intel
+        sudo modprobe kvm_intel nested=1
+        if [ $? != 0 ]; then
+            echo "KVM module reloaded with nested virtualization enabled"
+        fi
     fi
 fi
 
