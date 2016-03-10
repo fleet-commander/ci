@@ -16,14 +16,6 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
-
-if [ -z $1 ]; then
-    BRANCH="master"
-else
-    BRANCH=$1
-fi
-
 systool -m kvm_intel -A nested | grep nested | grep Y > /dev/null 2>&1
 
 if [ $? != 0 ]; then
@@ -46,6 +38,22 @@ if [ $? != 0 ]; then
             echo "KVM module reloaded with nested virtualization enabled"
         fi
     fi
+fi
+
+# Check we have our box file
+if [ ! -f ./fedora.box ]; then
+    echo "##########################################################################"
+    echo "# Downloading fedora box"
+    echo "##########################################################################"
+    wget https://download.fedoraproject.org/pub/fedora/linux/releases/23/Cloud/x86_64/Images/Fedora-Cloud-Base-Vagrant-23-20151030.x86_64.vagrant-libvirt.box -O fedora.box
+    if [ $? != 0 ]; then
+        echo "Failed to download box"
+        exit 1
+    fi
+    echo "##########################################################################"
+    echo "# Adding fedora box"
+    echo "##########################################################################"
+    vagrant box add ./fedora.box --name fedora/23-cloud-base --force
 fi
 
 echo "##########################################################################"

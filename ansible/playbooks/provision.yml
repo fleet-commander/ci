@@ -85,12 +85,18 @@
       file: path=/home/vagrant/logger/ state=directory owner=vagrant
     - name: Copy Vagrantfile for logger virtual machine directory
       copy: src=../config/Vagrantfile.logger dest=/home/vagrant/logger/Vagrantfile owner=vagrant
+    - name: Check if we have a box file already downloaded
+      become: false
+      local_action: stat path=../../fedora.box
+      register: boxfile
+    - name: Copy Vagrant box for logger virtual machine directory
+      copy: src=../../fedora.box dest=/home/vagrant/fedora.box
+      when: boxfile.stat.exists
     - name: Download Fedora box file from Vagrant Atlas
-      get_url: url=https://download.fedoraproject.org/pub/fedora/linux/releases/23/Cloud/x86_64/Images/Fedora-Cloud-Base-Vagrant-23-20151030.x86_64.vagrant-libvirt.box dest=/tmp/fedora.box
+      get_url: url=https://download.fedoraproject.org/pub/fedora/linux/releases/23/Cloud/x86_64/Images/Fedora-Cloud-Base-Vagrant-23-20151030.x86_64.vagrant-libvirt.box dest=/home/vagrant/fedora.box
+      when: not boxfile.stat.exists
     - name: Add box to vagrant boxes
-      command: vagrant box add /tmp/fedora.box --name fedora/23-cloud-base --force
-    - name: Remove box file
-      file: path=/tmp/fedora.box state=absent
+      command: vagrant box add /home/vagrant/fedora.box --name fedora/23-cloud-base --force
     - name: Copy vagrant user public key to root user
       command: cp /home/vagrant/.ssh/authorized_keys /root/.ssh/
 
