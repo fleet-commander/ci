@@ -1,0 +1,74 @@
+# Copyright (C) 2016 Red Hat, Inc.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the licence, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Author: Oliver Gutiérrez <ogutierrez@redhat.com>
+
+
+- hosts: hyper
+  become: true
+  tasks:
+    - name: Remove previous RPM packages
+      file: path=/home/vagrant/packages/ state=absent
+    - name: Copy RPM packages
+      synchronize: src=../../packages/ dest=/home/vagrant/packages/
+    - name: Destroy logger virtual machine
+      command: vagrant destroy logger
+      args:
+        chdir: /home/vagrant/logger/
+      ignore_errors: yes
+    - name: Create logger virtual machine and provision it
+      command: vagrant up logger
+      args:
+        chdir: /home/vagrant/logger/
+    - name: Halt logger virtual machine
+      command: vagrant halt logger
+      args:
+        chdir: /home/vagrant/logger/
+
+- hosts: admin
+  become: true
+  tasks:
+    - name: Remove previous RPM packages
+      file: path=/home/vagrant/packages/ state=absent
+    - name: Copy RPM packages
+      synchronize: src=../../packages/ dest=/home/vagrant/packages/
+    - name: Remove any previous fleet commander admin installation
+      dnf: name=fleet-commander-admin state=absent
+    - name: Install fleet commander admin package
+      shell: dnf install -y --allowerasing fleet-commander-admin*.rpm
+      args:
+        chdir: /home/vagrant/packages/
+    - name: Create link for admin application in apache config
+      file: src=/etc/xdg/fleet-commander-apache.conf dest=/etc/httpd/conf.d/fleet-commander-apache.conf state=link
+    - name: Obtain hypervisor machine IP address
+      register: hyper_ip
+      shell: echo -n `ip -4 addr show eth0 | grep inet | cut -d ' ' -f 6 | cut -d / -f 1`
+      delegate_to: hyper
+    - name: Push hypervisor private key to fleet-commander-admin config
+      copy: src=../../.vagrant/machines/hyper/libvirt/private_key dest=/var/lib/fleet-commander-admin/id_rsa mode=0600
+    - name: Read hypervisor public key
+      slurp: src=/home/vagrant/.ssh/authorized_keys
+      register: hyper_pubkey
+      delegate_to: hyper
+    - name: Write hypervisor public key into fleet-commander-admin config
+      copy:
+        dest: /var/lib/fleet-commander-admin/id_rsa.pub
+        content: "{{ hyper_pubkey.content | b64decode }}"
+    - name: Restart apache web server
+      service: name=httpd state=restarted
+    - name: Show IP address
+      register: admin_ip
+      shell: echo -n "Connect to http://" ; echo -n `ip -4 addr show eth0 | grep inet | cut -d ' ' -f 6 | cut -d / -f 1` ; echo -n ":8008"
+    - debug: msg="{{ admin_ip.stdout_lines }} - Hypervisor IP address is {{ hyper_ip.stdout_lines }}"

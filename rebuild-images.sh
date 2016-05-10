@@ -16,42 +16,29 @@
 #
 # Author: Oliver Gutiérrez <ogutierrez@redhat.com>
 
-BASEDIR=/vagrant
-COMMAND=$0
-DIST=23
-DISTS=`ls $BASEDIR/data/`
-IMAGES="build"
 
-if [ $UID != 0 ]; then
-    echo "You must have root privileges to execute this script"
-    exit 1
-fi
+BUILD_PRIVATE_KEY=.vagrant/machines/build/libvirt/private_key
+INVENTORY_FILE=.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
 
-function usage {
-    echo "Usage: $COMMAND [--help] [DOCKER_OPTIONS]"
-}
-
-function help {
-    usage
-    echo -e "\t--help: Shows this help"
-}
-
-if [[ $* == *--help* ]]; then
-    help
-    exit 1
-fi
-
-if [[ $DISTS == *$DIST* ]]; then
-
-    cd $BASEDIR
-    for IMG in $IMAGES
-    do
-        docker build -f data/$DIST/Dockerfile.$IMG -t fc-$IMG:$DIST $* .
-        if [ $? != 0 ]; then
-            echo "Error building $IMG image"
-            exit 1
-        fi
-    done
+if [ -z $1 ]; then
+    BRANCH="master"
 else
-    echo "Specified target distribution is not valid. "
+    BRANCH=$1
 fi
+
+if [ -z $2 ]; then
+    REPO="https://github.com/fleet-commander/fc-admin.git"
+else
+    REPO=$2
+fi
+
+
+echo "##########################################################################"
+echo "# Building fleet commander: $BRANCH"
+echo "##########################################################################"
+PYTHONUNBUFFERED=1 \
+ANSIBLE_FORCE_COLOR=true \
+ANSIBLE_HOST_KEY_CHECKING=false \
+ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ControlMaster=auto -o ControlPersist=60s' \
+ansible-playbook --private-key=$BUILD_PRIVATE_KEY -u vagrant -i $INVENTORY_FILE -vv ansible/playbooks/build.yml --extra-vars "repo_version=$BRANCH repo_address='$REPO'"
+
